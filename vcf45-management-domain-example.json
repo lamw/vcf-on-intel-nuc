@@ -1,0 +1,189 @@
+{
+	"taskName": "workflowconfig/workflowspec-ems.json",
+	"sddcId": "sfo-m01",
+	"ceipEnabled": "True",
+	"fipsEnabled": "False",
+	"managementPoolName": "sfo-m01-np01",
+	"skipEsxThumbprintValidation": true,
+	"esxLicense": "FILL_ME_IN_VCF_ESXI_LICENSE_KEY",
+	"excludedComponents": [
+		"NSX-V", "LogInsight", "AVN"
+	],
+	"ntpServers": [
+		"pool.ntp.org"
+	],
+	"dnsSpec": {
+		"domain": "primp-industries.local",
+		"subdomain": "primp-industries.local",
+		"nameserver": "192.168.30.2"
+	},
+	"sddcManagerSpec": {
+		"hostname": "vcf-m01-sddcm01",
+		"ipAddress": "192.168.30.181",
+		"netmask": "255.255.255.0",
+		"localUserPassword": "VMware1!VMware1!",
+		"rootUserCredentials": {
+			"username": "root",
+			"password": "VMware1!VMware1!"
+		},
+		"restApiCredentials": {
+			"username": "admin",
+			"password": "VMware1!VMware1!"
+		},
+		"secondUserCredentials": {
+			"username": "vcf",
+			"password": "VMware1!VMware1!"
+		}
+	},
+	"networkSpecs": [{
+			"networkType": "MANAGEMENT",
+			"subnet": "192.168.30.0/24",
+			"vlanId": "0",
+			"mtu": "1500",
+			"gateway": "192.168.30.1",
+			"portGroupKey": "sfo-m01-cl01-vds01-mgmt"
+		},
+		{
+			"networkType": "VMOTION",
+			"subnet": "172.16.12.0/24",
+			"includeIpAddressRanges": [{
+				"startIpAddress": "172.16.12.101",
+				"endIpAddress": "172.16.12.108"
+			}],
+			"vlanId": "0",
+			"mtu": "8900",
+			"gateway": "172.16.12.1",
+			"portGroupKey": "sfo-m01-cl01-vds01-vmotion"
+		},
+		{
+			"networkType": "VSAN",
+			"subnet": "172.16.13.0/24",
+			"includeIpAddressRanges": [{
+				"startIpAddress": "172.16.13.101",
+				"endIpAddress": "172.16.13.108"
+			}],
+			"vlanId": "0",
+			"mtu": "8900",
+			"gateway": "172.16.13.1",
+			"portGroupKey": "sfo-m01-cl01-vds01-vsan"
+		}
+	],
+	"nsxtSpec": {
+		"nsxtManagerSize": "small",
+		"nsxtManagers": [{
+			"hostname": "vcf-m01-nsx01a",
+			"ip": "192.168.30.185"
+		}],
+		"rootNsxtManagerPassword": "VMware1!VMware1!",
+		"nsxtAdminPassword": "VMware1!VMware1!",
+		"nsxtAuditPassword": "VMware1!VMware1!",
+		"rootLoginEnabledForNsxtManager": "true",
+		"sshEnabledForNsxtManager": "true",
+		"overLayTransportZone": {
+			"zoneName": "sfo-m01-tz-overlay01",
+			"networkName": "netName-overlay"
+		},
+		"vlanTransportZone": {
+			"zoneName": "sfo-m01-tz-vlan01",
+			"networkName": "netName-vlan"
+		},
+		"vip": "192.168.30.184",
+		"vipFqdn": "vcf-m01-nsx01",
+		"nsxtLicense": "FILL_ME_IN_VCF_NSX_LICENSE_KEY",
+		"transportVlanId": 1614
+	},
+	"vsanSpec": {
+		"vsanName": "vsan-1",
+		"licenseFile": "FILL_ME_IN_VCF_VSAN_LICENSE_KEY",
+		"vsanDedup": false,
+		"datastoreName": "sfo-m01-cl01-ds-vsan01"
+	},
+	"dvsSpecs": [{
+		"mtu": "8900",
+		"niocSpecs": [{
+				"trafficType": "VSAN",
+				"value": "HIGH"
+			},
+			{
+				"trafficType": "VMOTION",
+				"value": "LOW"
+			},
+			{
+				"trafficType": "VDP",
+				"value": "LOW"
+			},
+			{
+				"trafficType": "VIRTUALMACHINE",
+				"value": "HIGH"
+			},
+			{
+				"trafficType": "MANAGEMENT",
+				"value": "NORMAL"
+			},
+			{
+				"trafficType": "NFS",
+				"value": "LOW"
+			},
+			{
+				"trafficType": "HBR",
+				"value": "LOW"
+			},
+			{
+				"trafficType": "FAULTTOLERANCE",
+				"value": "LOW"
+			},
+			{
+				"trafficType": "ISCSI",
+				"value": "LOW"
+			}
+		],
+		"dvsName": "sfo-m01-cl01-vds01",
+		"vmnics": [
+			"vmnic0",
+			"vmnic1"
+		],
+		"networks": [
+			"MANAGEMENT",
+			"VMOTION",
+			"VSAN"
+		]
+	}],
+	"clusterSpec": {
+		"vmFolders": {
+			"MANAGEMENT": "sfo-m01-fd-mgmt",
+			"NETWORKING": "sfo-m01-fd-nsx",
+			"EDGENODES": "sfo-m01-fd-edge"
+		},
+		"clusterName": "sfo-m01-cl01",
+		"hostFailuresToTolerate": 0,
+		"clusterEvcMode": ""
+	},
+	"pscSpecs": [{
+		"pscSsoSpec": {
+			"ssoDomain": "vsphere.local"
+		},
+		"adminUserSsoPassword": "VMware1!"
+	}],
+	"vcenterSpec": {
+		"vcenterIp": "192.168.30.183",
+		"vcenterHostname": "vcf-m01-vc01",
+		"licenseFile": "FILL_ME_IN_VCF_VC_LICENSE_KEY",
+		"rootVcenterPassword": "VMware1!",
+		"vmSize": "tiny"
+	},
+	"hostSpecs": [{
+		"hostname": "vcf-m01-esx01",
+		"vSwitch": "vSwitch0",
+		"association": "sfo-m01-dc01",
+		"credentials": {
+			"username": "root",
+			"password": "VMware1!"
+		},
+		"ipAddressPrivate": {
+			"subnet": "255.255.255.0",
+			"ipAddress": "192.168.30.182",
+			"gateway": "192.168.30.1"
+		}
+	}],
+	"subscriptionLicensing": "False"
+}
