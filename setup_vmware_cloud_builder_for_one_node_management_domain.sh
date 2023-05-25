@@ -29,24 +29,14 @@ mkdir -p /root/oldiso
 cecho "Re-mounting sddc-foundation-bundle.iso to /root/oldiso ..."
 mount -o loop /opt/vmware/vcf/iso/sddc-foundation-bundle.iso /root/oldiso
 
-cecho "Enabling overlay module & mounting new overlay directories ..."
-modprobe overlay
-mount -t overlay -o lowerdir=/root/oldiso,upperdir=/overlay/upper,workdir=/overlay/work overlay /mnt/iso
-
-ORIGINAL_NSX_OVA_PATH=$(find /mnt/iso -print | grep nsx-unified)
-ORIGINAL_NSX_OVA_BASEPATH=$(dirname ${ORIGINAL_NSX_OVA_PATH})
-ORIGINAL_NSX_OVA_FILENAME=$(basename ${ORIGINAL_NSX_OVA_PATH})
-ORIGINAL_NSX_OVF_FILENAME="${ORIGINAL_NSX_OVA_FILENAME%.*}.ovf"
-
-NEW_NSX_OVA_PATH=$(echo ${ORIGINAL_NSX_OVA_PATH} | sed 's#/mnt/iso/#/overlay/work/work/#g')
-NEW_NSX_OVA_BASEPATH=$(dirname ${NEW_NSX_OVA_PATH})
-NEW_NSX_OVF_PATH="${NEW_NSX_OVA_BASEPATH}/${ORIGINAL_NSX_OVF_FILENAME}"
-NEW_NSX_OVA_PATH="${NEW_NSX_OVA_BASEPATH}/${ORIGINAL_NSX_OVA_FILENAME}"
+ORIGINAL_NSX_OVA_PATH=$(find /root/oldiso -type f -name "nsx-unified*.ova")
+NEW_NSX_OVA_PATH="/overlay/upper/${ORIGINAL_NSX_OVA_PATH#/root/oldiso/}"
+NEW_NSX_OVF_PATH="${NEW_NSX_OVA_PATH%.*}.ovf"
 
 cecho "Converting original NSX OVA to OVF ..."
-mkdir -p ${NEW_NSX_OVA_BASEPATH}
+mkdir -p "$(dirname "${NEW_NSX_OVA_PATH}")"
 ovftool --acceptAllEulas --allowExtraConfig --allowAllExtraConfig --disableVerification ${ORIGINAL_NSX_OVA_PATH} ${NEW_NSX_OVF_PATH}
-rm ${NEW_NSX_OVA_BASEPATH}/*.mf
+rm "${NEW_NSX_OVA_PATH%.ova}.mf"
 
 cecho "Removing memory reservation from NSX OVA ..."
 sed -i '/        <rasd:Reservation>.*/d' ${NEW_NSX_OVF_PATH}
@@ -55,13 +45,15 @@ cecho "Converting modified NSX OVF to OVA ..."
 ovftool --acceptAllEulas --allowExtraConfig --allowAllExtraConfig --disableVerification ${NEW_NSX_OVF_PATH} ${NEW_NSX_OVA_PATH}
 
 cecho "Cleaning up ..."
-rm ${NEW_NSX_OVA_BASEPATH}/*.ovf
-rm ${NEW_NSX_OVA_BASEPATH}/*.vmdk
+rm "${NEW_NSX_OVA_PATH%.ova}.ovf"
+rm $(dirname "${NEW_NSX_OVA_PATH}")/*.vmdk
 
 cecho "Update permisisons in /mnt/iso & /overlay directory ..."
-chown nobody:nogroup -R /overlay/work
-chmod -R 755 /overlay/work
-chown nobody:nogroup -R /mnt/iso
-chmod -R 755 /mnt/iso
+chown nobody:nogroup -R /overlay/upper
+chmod -R 755 /overlay/upper
+
+cecho "Enabling overlay module & mounting new overlay directories ..."
+modprobe overlay
+mount -t overlay -o lowerdir=/root/oldiso,upperdir=/overlay/upper,workdir=/overlay/work overlay /mnt/iso
 
 cecho "VMware Cloud Builder 1-Node Setup script has completed ..."
